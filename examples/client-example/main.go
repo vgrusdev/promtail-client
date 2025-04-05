@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"time"
-	"github.com/afiskon/promtail-client/promtail"
+	"github.com/vgrusdev/promtail-client/promtail"
 )
 
 func displayUsage() {
