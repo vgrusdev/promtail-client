@@ -10,6 +10,7 @@ import (
 	"log"
 	"sync"
 	"time"
+	"encoding/json"
 )
 
 // Promtail common Logs entry format accepted by Chan() chan<- *promtailStream
@@ -104,8 +105,14 @@ func (c *clientProto) send(batch []*promtailStream) {
 			}
 			entries = append(entries, &protoEntry)
 		}
+		jsonLabels, err := json.Marshal(pStream.Labels)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
 		protoStream := logproto.Stream {
-			Labels: pStream.Labels,
+			//Labels: pStream.Labels,
+			Labels: string(jsonLabels)
 			Entries: entries,
 		}
 		streams = append(streams, &protoStream)
