@@ -94,7 +94,7 @@ func (m *Stream) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Stream proto.InternalMessageInfo
 
-func (m *Stream) GetLabels() string {
+func (m *Stream) GetLabels() map[string]string {
 	if m != nil {
 		return m.Labels
 	}
