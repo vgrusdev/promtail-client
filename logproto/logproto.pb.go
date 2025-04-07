@@ -98,7 +98,7 @@ func (m *Stream) GetLabels() map[string]string {
 	if m != nil {
 		return m.Labels
 	}
-	return ""
+	return map[string]string
 }
 
 func (m *Stream) GetEntries() []*Entry {
