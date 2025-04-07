@@ -3,7 +3,8 @@ package promtail
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes/timestamp"
+	timestamp "github.com/golang/protobuf/ptypes/timestamp"
+	//"google.golang.org/protobuf/types/known/timestamppb"
 	"github.com/golang/snappy"
 	"github.com/vgrusdev/promtail-client/logproto"
 	"log"
@@ -11,25 +12,31 @@ import (
 	"time"
 )
 
-type protoLogEntry struct {
-	entry *logproto.Entry
-	level LogLevel
+// Promtail common Logs entry format accepted by Chan() chan<- *promtailStream
+type promtailEntry struct {
+	Ts    time.Time
+	Line  string
 }
+type promtailStream struct {
+	Labels  map[string]string
+	Entries []*promtailEntry
+}
+// -------------------
 
 type clientProto struct {
 	config    *ClientConfig
 	quit      chan struct{}
-	entries   chan protoLogEntry
+	entries   chan *promtailStream
 	waitGroup sync.WaitGroup
-	client    httpClient
+	client    myHttpClient
 }
 
 func NewClientProto(conf ClientConfig) (Client, error) {
 	client := clientProto{
 		config:  &conf,
 		quit:    make(chan struct{}),
-		entries: make(chan protoLogEntry, LOG_ENTRIES_CHAN_SIZE),
-		client:  httpClient{},
+		entries: make(chan *promtailStream, LOG_ENTRIES_CHAN_SIZE),
+		client:  myHttpClient{},
 	}
 
 	client.waitGroup.Add(1)
@@ -38,36 +45,8 @@ func NewClientProto(conf ClientConfig) (Client, error) {
 	return &client, nil
 }
 
-func (c *clientProto) Debugf(format string, args ...interface{}) {
-	c.log(format, DEBUG, "Debug: ", args...)
-}
-
-func (c *clientProto) Infof(format string, args ...interface{}) {
-	c.log(format, INFO, "Info: ", args...)
-}
-
-func (c *clientProto) Warnf(format string, args ...interface{}) {
-	c.log(format, WARN, "Warn: ", args...)
-}
-
-func (c *clientProto) Errorf(format string, args ...interface{}) {
-	c.log(format, ERROR, "Error: ", args...)
-}
-
-func (c *clientProto) log(format string, level LogLevel, prefix string, args ...interface{}) {
-	if (level >= c.config.SendLevel) || (level >= c.config.PrintLevel) {
-		now := time.Now().UnixNano()
-		c.entries <- protoLogEntry{
-			entry: &logproto.Entry{
-				Timestamp: &timestamp.Timestamp{
-					Seconds: now / int64(time.Second),
-					Nanos:   int32(now % int64(time.Second)),
-				},
-				Line: fmt.Sprintf(prefix+format, args...),
-			},
-			level: level,
-		}
-	}
+func (c *clientJson) Chan() chan<- *promtailStream {
+	return c.entries
 }
 
 func (c *clientProto) Shutdown() {
@@ -76,7 +55,7 @@ func (c *clientProto) Shutdown() {
 }
 
 func (c *clientProto) run() {
-	var batch []*logproto.Entry
+	var batch []*promtailStream
 	batchSize := 0
 	maxWait := time.NewTimer(c.config.BatchWait)
 
@@ -93,24 +72,18 @@ func (c *clientProto) run() {
 		case <-c.quit:
 			return
 		case entry := <-c.entries:
-			if entry.level >= c.config.PrintLevel {
-				log.Print(entry.entry.Line)
-			}
-
-			if entry.level >= c.config.SendLevel {
-				batch = append(batch, entry.entry)
-				batchSize++
-				if batchSize >= c.config.BatchEntriesNumber {
-					c.send(batch)
-					batch = []*logproto.Entry{}
-					batchSize = 0
-					maxWait.Reset(c.config.BatchWait)
-				}
+			batch = append(batch, entry)
+			batchSize++
+			if batchSize >= c.config.BatchEntriesNumber {
+				c.send(batch)
+				batch = []*promtailStream{}
+				batchSize = 0
+				maxWait.Reset(c.config.BatchWait)
 			}
 		case <-maxWait.C:
 			if batchSize > 0 {
 				c.send(batch)
-				batch = []*logproto.Entry{}
+				batch = []*promtailStream{}
 				batchSize = 0
 			}
 			maxWait.Reset(c.config.BatchWait)
@@ -118,12 +91,25 @@ func (c *clientProto) run() {
 	}
 }
 
-func (c *clientProto) send(entries []*logproto.Entry) {
-	var streams []*logproto.Stream
-	streams = append(streams, &logproto.Stream{
-		Labels:  c.config.Labels,
-		Entries: entries,
-	})
+func (c *clientProto) send(batch []*promtailStream) {
+
+	entries := []*logproto.Entry{}
+	streams := []*logproto.Stream{}
+
+	for _, pStream := range batch {
+		for pEntry := range pStream.Entries {
+			protoEntry := logproto.Entry { 
+				Timestamp: timestamp.New(*pEntry.Ts),
+				Line:      *pEntry.Line, 
+			}
+			entries = append(entries, &protoEntry)
+		}
+		protoStream := logproto.Stream {
+			Labels: pStream.Labels,
+			Entries: entries,
+		}
+		streams = append(streams, &protoStream)
+	}
 
 	req := logproto.PushRequest{
 		Streams: streams,
@@ -137,7 +123,7 @@ func (c *clientProto) send(entries []*logproto.Entry) {
 
 	buf = snappy.Encode(nil, buf)
 
-	resp, body, err := c.client.sendJsonReq("POST", c.config.PushURL, "application/x-protobuf", buf)
+	resp, body, err := c.client.sendReq("POST", c.config.PushURL, "application/x-protobuf", buf)
 	if err != nil {
 		log.Printf("promtail.ClientProto: unable to send an HTTP request: %s\n", err)
 		return

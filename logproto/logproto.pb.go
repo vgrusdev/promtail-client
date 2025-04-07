@@ -61,11 +61,12 @@ func (m *PushRequest) GetStreams() []*Stream {
 }
 
 type Stream struct {
-	Labels               string   `protobuf:"bytes,1,opt,name=labels,proto3" json:"labels,omitempty"`
-	Entries              []*Entry `protobuf:"bytes,2,rep,name=entries,proto3" json:"entries,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	//Labels               string   `protobuf:"bytes,1,opt,name=labels,proto3" json:"labels,omitempty"`
+	Labels               map[string]string   `protobuf:"bytes,1,opt,name=labels,proto3" json:"labels,omitempty"`
+	Entries              []*Entry             `protobuf:"bytes,2,rep,name=entries,proto3" json:"entries,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
 }
 
 func (m *Stream) Reset()         { *m = Stream{} }
