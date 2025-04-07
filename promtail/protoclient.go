@@ -3,7 +3,7 @@ package promtail
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	timestamp "github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	//"google.golang.org/protobuf/types/known/timestamppb"
 	"github.com/golang/snappy"
 	"github.com/vgrusdev/promtail-client/logproto"
