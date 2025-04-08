@@ -88,9 +88,11 @@ func (c *clientJson) run() {
 	}()
 
 	fmt.Println("run() is running... ")
+
 	for {
 		select {
 		case <-c.quit:
+			fmt.Println("run()- QUIT ...")
 			return
 		case entry := <-c.entries:
 			fmt.Println("Got an entry...")
@@ -125,6 +127,9 @@ func (c *clientJson) run() {
 //	var batch []*PromtailStream
 
 func (c *clientJson) send(batch []*PromtailStream) {
+
+
+	fmt.Println("Send function call")
 
 	entries := []*jsonEntry{}
 	streams := []*jsonStream{}
