@@ -140,16 +140,8 @@ func (c *clientProto) send(batch []*PromtailStream) {
 			Labels: labels,
 			Entries: entries,
 		}
-		fmt.Println("protoStreram:")
-		fmt.Println(protoStream)
-		fmt.Println("Labels:")
-		fmt.Println(labels)
-
 		streams = append(streams, &protoStream)
 	}
-	fmt.Println("Protostreams to send: ")
-	fmt.Println(streams)
-
 	req := logproto.PushRequest{
 		Streams: streams,
 	}
@@ -159,7 +151,6 @@ func (c *clientProto) send(batch []*PromtailStream) {
 		log.Printf("promtail.ClientProto: unable to marshal: %s\n", err)
 		return
 	}
-	fmt.Println("Protoclient to send: ", string(buf))
 
 	buf = snappy.Encode(nil, buf)
 

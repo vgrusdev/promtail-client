@@ -66,8 +66,6 @@ func NewClientJson(conf ClientConfig) (Client, error) {
 	client.waitGroup.Add(1)
 	go client.run()
 
-	fmt.Println("NewClientJson created")
-
 	return &client, nil
 }
 
