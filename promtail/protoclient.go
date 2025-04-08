@@ -93,7 +93,7 @@ func (c *clientProto) send(batch []*promtailStream) {
 				Timestamp: &timestamp.Timestamp {
 						Seconds: tNano / int64(time.Second),
 						Nanos:   int32(tNano % int64(time.Second)),
-				}
+				},
 				Line:      pEntry.Line, 
 			}
 			entries = append(entries, &protoEntry)
