@@ -112,7 +112,7 @@ func (c *clientProto) send(batch []*promtailStream) {
 		}
 		protoStream := logproto.Stream {
 			//Labels: pStream.Labels,
-			Labels: string(jsonLabels)
+			Labels: string(jsonLabels),
 			Entries: entries,
 		}
 		streams = append(streams, &protoStream)
