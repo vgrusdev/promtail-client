@@ -126,12 +126,15 @@ func (c *clientProto) send(batch []*PromtailStream) {
 						}
 			entries = append(entries, &protoEntry)
 		}
+		/*
 		jsonLabels, err := json.Marshal(pStream.Labels)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 		labels := string(jsonLabels)
+		*/
+		labels := mapToLabels(pStream.Labels)
 		protoStream := logproto.Stream {
 			//Labels: pStream.Labels,
 			Labels: labels,
@@ -141,7 +144,7 @@ func (c *clientProto) send(batch []*PromtailStream) {
 		fmt.Println(protoStream)
 		fmt.Println("Labels:")
 		fmt.Println(labels)
-		
+
 		streams = append(streams, &protoStream)
 	}
 	fmt.Println("Protostreams to send: ")
@@ -170,4 +173,18 @@ func (c *clientProto) send(batch []*PromtailStream) {
 		log.Printf("promtail.ClientProto: Unexpected HTTP status code: %d, message: %s\n", resp.StatusCode, body)
 		return
 	}
+}
+func mapToLabels(m  map[string]string) string {
+
+	s := "{"
+	f := false
+	for k, v := range m {
+		if f == true { 
+			s = s + ","
+		} else {
+			f = true
+		}
+        s = s + k + ":\"" + v + "\""
+    }
+	s = s + "}"
 }
