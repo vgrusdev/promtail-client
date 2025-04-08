@@ -3,7 +3,7 @@ package promtail
 import (
 	"encoding/json"
 	"fmt"
-	//"log"
+	"log"
 	"sync"
 	"time"
 	"net/http"
