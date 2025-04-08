@@ -88,8 +88,12 @@ func (c *clientProto) send(batch []*promtailStream) {
 
 	for _, pStream := range batch {
 		for _, pEntry := range pStream.Entries {
+			tNano := pEntry.Ts.UnixNano()
 			protoEntry := logproto.Entry { 
-				Timestamp: timestamp.New(pEntry.Ts),
+				Timestamp: &timestamp.Timestamp {
+						Seconds: tNano / int64(time.Second),
+						Nanos:   int32(tNano % int64(time.Second)),
+				}
 				Line:      pEntry.Line, 
 			}
 			entries = append(entries, &protoEntry)
