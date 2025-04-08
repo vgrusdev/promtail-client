@@ -6,6 +6,7 @@ import (
 	//"log"
 	"sync"
 	"time"
+	"net/http"
 )
 
 // =================================================
@@ -55,7 +56,11 @@ func NewClientJson(conf ClientConfig) (Client, error) {
 		config:  &conf,
 		quit:    make(chan struct{}),
 		entries: make(chan *PromtailStream, LOG_ENTRIES_CHAN_SIZE),
-		client:  myHttpClient{},
+		client:  myHttpClient{
+			parent: http.Client {
+				Timeout: conf.Timeout,
+			}
+		},
 	}
 
 	client.waitGroup.Add(1)
@@ -158,7 +163,7 @@ func (c *clientJson) send(batch []*PromtailStream) {
 		return
 	}
 	fmt.Println(string(jsonMsg))
-	/*
+	
 	resp, body, err := c.client.sendReq("POST", c.config.PushURL, "application/json", jsonMsg)
 	if err != nil {
 		log.Printf("promtail.ClientJson: unable to send an HTTP request: %s\n", err)
@@ -169,5 +174,5 @@ func (c *clientJson) send(batch []*PromtailStream) {
 		log.Printf("promtail.ClientJson: Unexpected HTTP status code: %d, message: %s\n", resp.StatusCode, body)
 		return
 	}
-	*/
+	
 }
