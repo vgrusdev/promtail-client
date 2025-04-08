@@ -138,7 +138,9 @@ func (c *clientJson) send(batch []*PromtailStream) {
 		streams = append(streams, &jStream)
 	}
 
-	msg := jsonStreams{streams}
+	msg := jsonStreams{
+		Streams: streams,
+	}
 	jsonMsg, err := json.Marshal(msg)
 	if err != nil {
 		log.Printf("promtail.ClientJson: unable to marshal a JSON document: %s\n", err)
