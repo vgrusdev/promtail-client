@@ -138,7 +138,8 @@ func (c *clientProto) send(batch []*PromtailStream) {
 		}
 		streams = append(streams, &protoStream)
 	}
-	fmt.Println("Protostreams to send: ", string(streams))
+	fmt.Println("Protostreams to send: "
+	fmt.Println(streams)
 
 	req := logproto.PushRequest{
 		Streams: streams,
