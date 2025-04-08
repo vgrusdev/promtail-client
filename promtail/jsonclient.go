@@ -37,7 +37,7 @@ type jsonStream struct {
 }
 
 type jsonStreams struct {
-	Streams []*jsonStream     `json:"streams"`
+	Streams []*jsonStream      `json:"streams"`
 }
 // -------------------
 
@@ -146,7 +146,7 @@ func (c *clientJson) send(batch []*PromtailStream) {
 		log.Printf("promtail.ClientJson: unable to marshal a JSON document: %s\n", err)
 		return
 	}
-	log.Println(string(jsonMsg))
+	fmt.Println(string(jsonMsg))
 	/*
 	resp, body, err := c.client.sendReq("POST", c.config.PushURL, "application/json", jsonMsg)
 	if err != nil {
