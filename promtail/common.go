@@ -17,9 +17,20 @@ type ClientConfig struct {
 
 type Client interface {
 //	Debugf(format string, args ...interface{})
-	Chan()
+	Chan() chan<- *promtailStream
 	Shutdown()
 }
+
+// Promtail common Logs entry format accepted by Chan() chan<- *promtailStream
+type promtailEntry struct {
+	Ts    time.Time
+	Line  string
+}
+type promtailStream struct {
+	Labels  map[string]string
+	Entries []*promtailEntry
+}
+
 
 // http.Client wrapper for adding new methods, particularly sendReq
 type myHttpClient struct {

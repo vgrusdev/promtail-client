@@ -8,16 +8,6 @@ import (
 	"time"
 )
 
-// Promtail common Logs entry format accepted by Chan() chan<- *promtailStream
-type promtailEntry struct {
-	Ts    time.Time
-	Line  string
-}
-type promtailStream struct {
-	Labels  map[string]string
-	Entries []*promtailEntry
-}
-// -------------------
 // =================================================
 // Logs format to be used for Marshal() to LOKI JSON api
 // =================================================
@@ -47,7 +37,7 @@ type jsonStream struct {
 }
 
 type jsonStreams struct {
-	Streams []*jsonlStream     `json:"streams"`
+	Streams []*jsonStream     `json:"streams"`
 }
 // -------------------
 
