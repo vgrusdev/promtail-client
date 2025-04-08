@@ -120,6 +120,7 @@ func (c *clientProto) send(batch []*promtailStream) {
 		log.Printf("promtail.ClientProto: unable to marshal: %s\n", err)
 		return
 	}
+	log.Println(string(buf))
 
 	buf = snappy.Encode(nil, buf)
 
@@ -128,7 +129,7 @@ func (c *clientProto) send(batch []*promtailStream) {
 		log.Printf("promtail.ClientProto: unable to send an HTTP request: %s\n", err)
 		return
 	}
-
+	
 	if resp.StatusCode != 204 {
 		log.Printf("promtail.ClientProto: Unexpected HTTP status code: %d, message: %s\n", resp.StatusCode, body)
 		return

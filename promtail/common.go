@@ -12,7 +12,7 @@ type ClientConfig struct {
 	PushURL            string			// E.g. http://localhost:3100/api/prom/push
 	BatchWait          time.Duration	// Batch flush wait timeout
 	BatchEntriesNumber int				// Batch buffer size
-	Timeout            int              // HTTP Client Timeout !ToDo
+	Timeout            time.Duration    // HTTP Client Timeout !ToDo
 }
 
 type Client interface {
