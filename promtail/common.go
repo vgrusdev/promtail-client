@@ -17,18 +17,18 @@ type ClientConfig struct {
 
 type Client interface {
 //	Debugf(format string, args ...interface{})
-	Chan() chan<- *promtailStream
+	Chan() chan<- *PromtailStream
 	Shutdown()
 }
 
-// Promtail common Logs entry format accepted by Chan() chan<- *promtailStream
-type promtailEntry struct {
+// Promtail common Logs entry format accepted by Chan() chan<- *PromtailStream
+type PromtailEntry struct {
 	Ts    time.Time
 	Line  string
 }
-type promtailStream struct {
+type PromtailStream struct {
 	Labels  map[string]string
-	Entries []*promtailEntry
+	Entries []*PromtailEntry
 }
 
 

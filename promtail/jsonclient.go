@@ -44,7 +44,7 @@ type jsonStreams struct {
 type clientJson struct {
 	config    *ClientConfig
 	quit      chan struct{}
-	entries   chan *promtailStream
+	entries   chan *PromtailStream
 	waitGroup sync.WaitGroup
 	client    myHttpClient
 
@@ -54,7 +54,7 @@ func NewClientJson(conf ClientConfig) (Client, error) {
 	client := clientJson {
 		config:  &conf,
 		quit:    make(chan struct{}),
-		entries: make(chan *promtailStream, LOG_ENTRIES_CHAN_SIZE),
+		entries: make(chan *PromtailStream, LOG_ENTRIES_CHAN_SIZE),
 		client:  myHttpClient{},
 	}
 
@@ -64,7 +64,7 @@ func NewClientJson(conf ClientConfig) (Client, error) {
 	return &client, nil
 }
 
-func (c *clientJson) Chan() chan<- *promtailStream {
+func (c *clientJson) Chan() chan<- *PromtailStream {
 	return c.entries
 }
 
@@ -74,7 +74,7 @@ func (c *clientJson) Shutdown() {
 }
 
 func (c *clientJson) run() {
-	var batch []*promtailStream
+	var batch []*PromtailStream
 	batchSize := 0
 	maxWait := time.NewTimer(c.config.BatchWait)
 
@@ -94,14 +94,14 @@ func (c *clientJson) run() {
 			batchSize++
 			if batchSize >= c.config.BatchEntriesNumber {
 				c.send(batch)
-				batch = []*promtailStream{}
+				batch = []*PromtailStream{}
 				batchSize = 0
 				maxWait.Reset(c.config.BatchWait)
 			}
 		case <-maxWait.C:
 			if batchSize > 0 {
 				c.send(batch)
-				batch = []*promtailStream{}
+				batch = []*PromtailStream{}
 				batchSize = 0
 			}
 			maxWait.Reset(c.config.BatchWait)
@@ -109,18 +109,18 @@ func (c *clientJson) run() {
 	}
 }
 
-// Promtail common Logs entry format accepted by Chan() chan<- *promtailStream
-//	type promtailEntry struct {
+// Promtail common Logs entry format accepted by Chan() chan<- *PromtailStream
+//	type PromtailEntry struct {
 //		Ts    time.Time
 //		Line  string
 //	}
-//	type promtailStream struct {
+//	type PromtailStream struct {
 //		Labels  map[string]string
-//		Entries []*promtailEntry
+//		Entries []*PromtailEntry
 //	}
-//	var batch []*promtailStream
+//	var batch []*PromtailStream
 
-func (c *clientJson) send(batch []*promtailStream) {
+func (c *clientJson) send(batch []*PromtailStream) {
 
 	entries := []*jsonEntry{}
 	streams := []*jsonStream{}

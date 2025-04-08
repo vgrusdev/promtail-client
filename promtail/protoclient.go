@@ -16,7 +16,7 @@ import (
 type clientProto struct {
 	config    *ClientConfig
 	quit      chan struct{}
-	entries   chan *promtailStream
+	entries   chan *PromtailStream
 	waitGroup sync.WaitGroup
 	client    myHttpClient
 }
@@ -25,7 +25,7 @@ func NewClientProto(conf ClientConfig) (Client, error) {
 	client := clientProto{
 		config:  &conf,
 		quit:    make(chan struct{}),
-		entries: make(chan *promtailStream, LOG_ENTRIES_CHAN_SIZE),
+		entries: make(chan *PromtailStream, LOG_ENTRIES_CHAN_SIZE),
 		client:  myHttpClient{},
 	}
 
@@ -35,7 +35,7 @@ func NewClientProto(conf ClientConfig) (Client, error) {
 	return &client, nil
 }
 
-func (c *clientProto) Chan() chan<- *promtailStream {
+func (c *clientProto) Chan() chan<- *PromtailStream {
 	return c.entries
 }
 
@@ -45,7 +45,7 @@ func (c *clientProto) Shutdown() {
 }
 
 func (c *clientProto) run() {
-	var batch []*promtailStream
+	var batch []*PromtailStream
 	batchSize := 0
 	maxWait := time.NewTimer(c.config.BatchWait)
 
@@ -66,14 +66,14 @@ func (c *clientProto) run() {
 			batchSize++
 			if batchSize >= c.config.BatchEntriesNumber {
 				c.send(batch)
-				batch = []*promtailStream{}
+				batch = []*PromtailStream{}
 				batchSize = 0
 				maxWait.Reset(c.config.BatchWait)
 			}
 		case <-maxWait.C:
 			if batchSize > 0 {
 				c.send(batch)
-				batch = []*promtailStream{}
+				batch = []*PromtailStream{}
 				batchSize = 0
 			}
 			maxWait.Reset(c.config.BatchWait)
@@ -81,7 +81,7 @@ func (c *clientProto) run() {
 	}
 }
 
-func (c *clientProto) send(batch []*promtailStream) {
+func (c *clientProto) send(batch []*PromtailStream) {
 
 	entries := []*logproto.Entry{}
 	streams := []*logproto.Stream{}
