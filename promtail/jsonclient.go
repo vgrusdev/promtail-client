@@ -109,15 +109,27 @@ func (c *clientJson) run() {
 	}
 }
 
+// Promtail common Logs entry format accepted by Chan() chan<- *promtailStream
+//	type promtailEntry struct {
+//		Ts    time.Time
+//		Line  string
+//	}
+//	type promtailStream struct {
+//		Labels  map[string]string
+//		Entries []*promtailEntry
+//	}
+//	var batch []*promtailStream
+
 func (c *clientJson) send(batch []*promtailStream) {
 
 	entries := []*jsonEntry{}
 	streams := []*jsonStream{}
 
-	
+
 	for _, pStream := range batch {
-		for pEntry := range pStream.Entries {
-			jEntry := []jsonEntry { fmt.Sprint(*pEntry.Ts.UnixNano()), *pEntry.Line, }
+		for pEntry := range (*pStream).Entries {
+
+			jEntry := []jsonEntry {{ fmt.Sprint((*pEntry).Ts.UnixNano()), (*pEntry).Line, },}
 			entries = append(entries, &jEntry)
 		}
 		jStream := jsonStream {
