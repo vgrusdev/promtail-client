@@ -131,11 +131,17 @@ func (c *clientProto) send(batch []*PromtailStream) {
 			fmt.Println(err)
 			continue
 		}
+		labels := string(jsonLabels)
 		protoStream := logproto.Stream {
 			//Labels: pStream.Labels,
-			Labels: string(jsonLabels),
+			Labels: labels,
 			Entries: entries,
 		}
+		fmt.Println("protoStreram:")
+		fmt.Println(protoStream)
+		fmt.Println("Labels:")
+		fmt.Println(labels)
+		
 		streams = append(streams, &protoStream)
 	}
 	fmt.Println("Protostreams to send: ")
