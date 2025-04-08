@@ -61,6 +61,8 @@ func NewClientJson(conf ClientConfig) (Client, error) {
 	client.waitGroup.Add(1)
 	go client.run()
 
+	fmt.Println("NewClientJson created")
+
 	return &client, nil
 }
 
@@ -85,11 +87,13 @@ func (c *clientJson) run() {
 		c.waitGroup.Done()
 	}()
 
+	fmt.Println("run() is running... ")
 	for {
 		select {
 		case <-c.quit:
 			return
 		case entry := <-c.entries:
+			fmt.Println("Got an entry...")
 			batch = append(batch, entry)
 			batchSize++
 			if batchSize >= c.config.BatchEntriesNumber {
