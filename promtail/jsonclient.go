@@ -92,15 +92,11 @@ func (c *clientJson) run() {
 		c.waitGroup.Done()
 	}()
 
-	fmt.Println("run() is running... ")
-
 	for {
 		select {
 		case <-c.quit:
-			fmt.Println("run()- QUIT ...")
 			return
 		case entry := <-c.entries:
-			fmt.Println("Got an entry...")
 			batch = append(batch, entry)
 			batchSize++
 			if batchSize >= c.config.BatchEntriesNumber {
@@ -117,30 +113,13 @@ func (c *clientJson) run() {
 			}
 			maxWait.Reset(c.config.BatchWait)
 		}
-		time.Sleep(time.Second)
-		fmt.Println("Loop")
 	}
 }
 
-// Promtail common Logs entry format accepted by Chan() chan<- *PromtailStream
-//	type PromtailEntry struct {
-//		Ts    time.Time
-//		Line  string
-//	}
-//	type PromtailStream struct {
-//		Labels  map[string]string
-//		Entries []*PromtailEntry
-//	}
-//	var batch []*PromtailStream
-
 func (c *clientJson) send(batch []*PromtailStream) {
-
-
-	fmt.Println("Send function call")
 
 	entries := []*jsonEntry{}
 	streams := []*jsonStream{}
-
 
 	for _, pStream := range batch {
 		for _, pEntry := range pStream.Entries {
@@ -157,13 +136,14 @@ func (c *clientJson) send(batch []*PromtailStream) {
 	msg := jsonStreams{
 		Streams: streams,
 	}
+
 	jsonMsg, err := json.Marshal(msg)
 	if err != nil {
 		fmt.Printf("promtail.ClientJson: unable to marshal a JSON document: %s\n", err)
 		return
 	}
-	fmt.Println(string(jsonMsg))
-	
+	//fmt.Println(string(jsonMsg))
+
 	resp, body, err := c.client.sendReq("POST", c.config.PushURL, "application/json", jsonMsg)
 	if err != nil {
 		log.Printf("promtail.ClientJson: unable to send an HTTP request: %s\n", err)
@@ -174,5 +154,4 @@ func (c *clientJson) send(batch []*PromtailStream) {
 		log.Printf("promtail.ClientJson: Unexpected HTTP status code: %d, message: %s\n", resp.StatusCode, body)
 		return
 	}
-	
 }

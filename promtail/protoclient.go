@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/timestamp"
-	//"google.golang.org/protobuf/types/known/timestamppb"
+	
 	"github.com/golang/snappy"
 	"github.com/vgrusdev/promtail-client/logproto"
 	"log"
 	"sync"
 	"time"
 	"encoding/json"
+	"net/http"
 )
 
 type clientProto struct {
@@ -26,7 +27,11 @@ func NewClientProto(conf ClientConfig) (Client, error) {
 		config:  &conf,
 		quit:    make(chan struct{}),
 		entries: make(chan *PromtailStream, LOG_ENTRIES_CHAN_SIZE),
-		client:  myHttpClient{},
+		client:  myHttpClient{
+			parent: http.Client {
+				Timeout: conf.Timeout,
+			},
+		},
 	}
 
 	client.waitGroup.Add(1)
@@ -120,7 +125,7 @@ func (c *clientProto) send(batch []*PromtailStream) {
 		log.Printf("promtail.ClientProto: unable to marshal: %s\n", err)
 		return
 	}
-	log.Println(string(buf))
+	fmt.Println("Protoclient send: ", string(buf))
 
 	buf = snappy.Encode(nil, buf)
 
