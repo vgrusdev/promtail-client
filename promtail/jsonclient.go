@@ -3,7 +3,7 @@ package promtail
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	//"log"
 	"sync"
 	"time"
 )
@@ -112,6 +112,8 @@ func (c *clientJson) run() {
 			}
 			maxWait.Reset(c.config.BatchWait)
 		}
+		time.Sleep(time.Second)
+		fmt.Println("Loop")
 	}
 }
 
@@ -152,7 +154,7 @@ func (c *clientJson) send(batch []*PromtailStream) {
 	}
 	jsonMsg, err := json.Marshal(msg)
 	if err != nil {
-		log.Printf("promtail.ClientJson: unable to marshal a JSON document: %s\n", err)
+		fmt.Printf("promtail.ClientJson: unable to marshal a JSON document: %s\n", err)
 		return
 	}
 	fmt.Println(string(jsonMsg))
