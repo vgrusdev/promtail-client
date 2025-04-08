@@ -127,9 +127,8 @@ func (c *clientJson) send(batch []*promtailStream) {
 
 
 	for _, pStream := range batch {
-		for pEntry := range (*pStream).Entries {
-
-			jEntry := []jsonEntry {{ fmt.Sprint((*pEntry).Ts.UnixNano()), (*pEntry).Line, },}
+		for _, pEntry := range pStream.Entries {
+			jEntry := jsonEntry { fmt.Sprint(pEntry.Ts.UnixNano()), pEntry.Line, }
 			entries = append(entries, &jEntry)
 		}
 		jStream := jsonStream {
@@ -145,7 +144,7 @@ func (c *clientJson) send(batch []*promtailStream) {
 		log.Printf("promtail.ClientJson: unable to marshal a JSON document: %s\n", err)
 		return
 	}
-	log.Println(string(msg))
+	log.Println(string(jsonMsg))
 	/*
 	resp, body, err := c.client.sendReq("POST", c.config.PushURL, "application/json", jsonMsg)
 	if err != nil {
