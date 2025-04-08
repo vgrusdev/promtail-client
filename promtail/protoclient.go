@@ -13,17 +13,6 @@ import (
 	"encoding/json"
 )
 
-// Promtail common Logs entry format accepted by Chan() chan<- *promtailStream
-type promtailEntry struct {
-	Ts    time.Time
-	Line  string
-}
-type promtailStream struct {
-	Labels  map[string]string
-	Entries []*promtailEntry
-}
-// -------------------
-
 type clientProto struct {
 	config    *ClientConfig
 	quit      chan struct{}
@@ -46,7 +35,7 @@ func NewClientProto(conf ClientConfig) (Client, error) {
 	return &client, nil
 }
 
-func (c *clientJson) Chan() chan<- *promtailStream {
+func (c *clientProto) Chan() chan<- *promtailStream {
 	return c.entries
 }
 
