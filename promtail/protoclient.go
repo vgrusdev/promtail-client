@@ -184,7 +184,7 @@ func mapToLabels(m  map[string]string) string {
 		} else {
 			f = true
 		}
-        s = s + k + ":\"" + v + "\""
+        s = s + k + "=\"" + v + "\""
     }
 	s = s + "}"
 	return s
