@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"net/http"
 )
+// https://habr.com/ru/companies/otus/articles/784732/
 
 type clientProto struct {
 	config    *ClientConfig
@@ -88,19 +89,41 @@ func (c *clientProto) run() {
 
 func (c *clientProto) send(batch []*PromtailStream) {
 
-	entries := []*logproto.Entry{}
+//	entries := []*logproto.Entry{}
+/* from logproto.pb.go
+	type Entry struct {
+		Timestamp            *timestamp.Timestamp `protobuf:"bytes,1,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+		Line                 string               `protobuf:"bytes,2,opt,name=line,proto3" json:"line,omitempty"`
+		XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+		XXX_unrecognized     []byte               `json:"-"`
+		XXX_sizecache        int32                `json:"-"`
+	}
+	type Stream struct {
+		Labels               string   `protobuf:"bytes,1,opt,name=labels,proto3" json:"labels,omitempty"`
+		Entries              []*Entry             `protobuf:"bytes,2,rep,name=entries,proto3" json:"entries,omitempty"`
+		XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+		XXX_unrecognized     []byte               `json:"-"`
+		XXX_sizecache        int32                `json:"-"`
+	}
+	type PushRequest struct {
+	Streams              []*Stream `protobuf:"bytes,1,rep,name=streams,proto3" json:"streams,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+	}
+*/
 	streams := []*logproto.Stream{}
-
 	for _, pStream := range batch {
+		entries := []*logproto.Entry{}
 		for _, pEntry := range pStream.Entries {
 			tNano := pEntry.Ts.UnixNano()
 			protoEntry := logproto.Entry { 
-				Timestamp: &timestamp.Timestamp {
-						Seconds: tNano / int64(time.Second),
-						Nanos:   int32(tNano % int64(time.Second)),
-				},
-				Line:      pEntry.Line, 
-			}
+							Timestamp: &timestamp.Timestamp {
+											Seconds: tNano / int64(time.Second),
+											Nanos:   int32(tNano % int64(time.Second)),
+										},
+							Line:      pEntry.Line, 
+						}
 			entries = append(entries, &protoEntry)
 		}
 		jsonLabels, err := json.Marshal(pStream.Labels)
@@ -115,6 +138,7 @@ func (c *clientProto) send(batch []*PromtailStream) {
 		}
 		streams = append(streams, &protoStream)
 	}
+	fmt.Println("Protostreams to send: ", string(streams))
 
 	req := logproto.PushRequest{
 		Streams: streams,
@@ -125,7 +149,7 @@ func (c *clientProto) send(batch []*PromtailStream) {
 		log.Printf("promtail.ClientProto: unable to marshal: %s\n", err)
 		return
 	}
-	fmt.Println("Protoclient send: ", string(buf))
+	fmt.Println("Protoclient to send: ", string(buf))
 
 	buf = snappy.Encode(nil, buf)
 

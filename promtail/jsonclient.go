@@ -118,10 +118,11 @@ func (c *clientJson) run() {
 
 func (c *clientJson) send(batch []*PromtailStream) {
 
-	entries := []*jsonEntry{}
+	//entries := []*jsonEntry{}
 	streams := []*jsonStream{}
 
 	for _, pStream := range batch {
+		entries := []*jsonEntry{}
 		for _, pEntry := range pStream.Entries {
 			jEntry := jsonEntry { fmt.Sprint(pEntry.Ts.UnixNano()), pEntry.Line, }
 			entries = append(entries, &jEntry)
