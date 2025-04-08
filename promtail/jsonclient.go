@@ -57,9 +57,9 @@ func NewClientJson(conf ClientConfig) (Client, error) {
 		quit:    make(chan struct{}),
 		entries: make(chan *PromtailStream, LOG_ENTRIES_CHAN_SIZE),
 		client:  myHttpClient{
-			parent: http.Client {
-				Timeout: conf.Timeout,
-			}
+					parent: http.Client {
+						Timeout: conf.Timeout,
+					},
 		},
 	}
 
