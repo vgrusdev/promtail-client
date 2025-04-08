@@ -87,10 +87,10 @@ func (c *clientProto) send(batch []*promtailStream) {
 	streams := []*logproto.Stream{}
 
 	for _, pStream := range batch {
-		for pEntry := range pStream.Entries {
+		for _, pEntry := range pStream.Entries {
 			protoEntry := logproto.Entry { 
-				Timestamp: timestamp.New(*pEntry.Ts),
-				Line:      *pEntry.Line, 
+				Timestamp: timestamp.New(pEntry.Ts),
+				Line:      pEntry.Line, 
 			}
 			entries = append(entries, &protoEntry)
 		}
