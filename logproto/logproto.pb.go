@@ -61,8 +61,7 @@ func (m *PushRequest) GetStreams() []*Stream {
 }
 
 type Stream struct {
-	//Labels               string   `protobuf:"bytes,1,opt,name=labels,proto3" json:"labels,omitempty"`
-	Labels               map[string]string   `protobuf:"bytes,1,opt,name=labels,proto3" json:"labels,omitempty"`
+	Labels               string   `protobuf:"bytes,1,opt,name=labels,proto3" json:"labels,omitempty"`
 	Entries              []*Entry             `protobuf:"bytes,2,rep,name=entries,proto3" json:"entries,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
@@ -94,11 +93,11 @@ func (m *Stream) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Stream proto.InternalMessageInfo
 
-func (m *Stream) GetLabels() (map[string]string) {
+func (m *Stream) GetLabels() string {
 	if m != nil {
 		return m.Labels
 	}
-	return map[string]string
+	return ""
 }
 
 func (m *Stream) GetEntries() []*Entry {
