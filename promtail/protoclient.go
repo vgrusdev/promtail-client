@@ -24,13 +24,13 @@ type clientProto struct {
 	client    myHttpClient
 }
 
-func NewClientProto(conf ClientConfig) (Client, error) {
+func NewClientProto(conf *ClientConfig) (Client, error) {
 	n := conf.Name
 	if n == "" {
 		conf.Name = "unknown_name"
 	}
 	client := clientProto{
-		config:  &conf,
+		config:  conf,
 		quit:    make(chan struct{}),
 		entries: make(chan *PromtailStream, LOG_ENTRIES_CHAN_SIZE),
 		single:  make(chan *SingleEntry, LOG_ENTRIES_CHAN_SIZE),
