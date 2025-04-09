@@ -14,7 +14,7 @@ type ClientConfig struct {
 	BatchWait          time.Duration	// Batch flush wait timeout
 	BatchEntriesNumber int				// Batch buffer size
 	Timeout            time.Duration    // HTTP Client Timeout !ToDo
-	Location:          *time.Location	// time location provided by Stream, e.g. Europe/Moscow
+	Location           *time.Location	// time location provided by Stream, e.g. Europe/Moscow
 }
 
 type Client interface {
