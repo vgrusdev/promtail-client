@@ -19,15 +19,21 @@ type clientProto struct {
 	config    *ClientConfig
 	quit      chan struct{}
 	entries   chan *PromtailStream
+	single    chan *SingleEntry
 	waitGroup sync.WaitGroup
 	client    myHttpClient
 }
 
 func NewClientProto(conf ClientConfig) (Client, error) {
+	n := conf.Name
+	if n == nil {
+		conf.Name = ""
+	}
 	client := clientProto{
 		config:  &conf,
 		quit:    make(chan struct{}),
 		entries: make(chan *PromtailStream, LOG_ENTRIES_CHAN_SIZE),
+		single   make(chan *SingleEntry, LOG_ENTRIES_CHAN_SIZE),
 		client:  myHttpClient{
 			parent: http.Client {
 				Timeout: conf.Timeout,
@@ -43,6 +49,10 @@ func NewClientProto(conf ClientConfig) (Client, error) {
 
 func (c *clientProto) Chan() chan<- *PromtailStream {
 	return c.entries
+}
+
+func (c *clientJson) Single() chan<- *SingleEntry {
+	return c.single
 }
 
 func (c *clientProto) Shutdown() {
@@ -69,6 +79,23 @@ func (c *clientProto) run() {
 			return
 		case entry := <-c.entries:
 			batch = append(batch, entry)
+			batchSize++
+			if batchSize >= c.config.BatchEntriesNumber {
+				c.send(batch)
+				batch = []*PromtailStream{}
+				batchSize = 0
+				maxWait.Reset(c.config.BatchWait)
+			}
+		case sentry := <-c.single
+			e := PromtailEntry {
+				Ts:     sentry.Ts,
+				Line:   sentry.Line,
+			}
+			s := PromtailStream {
+				Labels:  sentry.Labels,
+				Entries: []*PromtailEntry { &e, }
+			}
+			batch = append(batch, &s)
 			batchSize++
 			if batchSize >= c.config.BatchEntriesNumber {
 				c.send(batch)
@@ -126,14 +153,7 @@ func (c *clientProto) send(batch []*PromtailStream) {
 						}
 			entries = append(entries, &protoEntry)
 		}
-		/*
-		jsonLabels, err := json.Marshal(pStream.Labels)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		labels := string(jsonLabels)
-		*/
+
 		labels := mapToLabels(pStream.Labels)
 		protoStream := logproto.Stream {
 			//Labels: pStream.Labels,

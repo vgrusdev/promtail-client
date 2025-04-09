@@ -9,6 +9,7 @@ import (
 const LOG_ENTRIES_CHAN_SIZE = 5000
 
 type ClientConfig struct {
+	Name               string           // Label name will be added to the stream, will be discovered as service_name in Loki
 	PushURL            string			// E.g. http://localhost:3100/api/prom/push
 	BatchWait          time.Duration	// Batch flush wait timeout
 	BatchEntriesNumber int				// Batch buffer size
@@ -18,6 +19,7 @@ type ClientConfig struct {
 type Client interface {
 //	Debugf(format string, args ...interface{})
 	Chan() chan<- *PromtailStream
+	Single() chan<- *SingleEntry
 	Shutdown()
 }
 
@@ -30,7 +32,11 @@ type PromtailStream struct {
 	Labels  map[string]string
 	Entries []*PromtailEntry
 }
-
+type SingleEntry struct {
+	Labels  map[string]string
+	Ts    	time.Time
+	Line  	string
+}
 
 // http.Client wrapper for adding new methods, particularly sendReq
 type myHttpClient struct {
