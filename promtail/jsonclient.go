@@ -54,8 +54,8 @@ type clientJson struct {
 
 func NewClientJson(conf ClientConfig) (Client, error) {
 	n := conf.Name
-	if n == nil {
-		conf.Name = ""
+	if n == "" {
+		conf.Name = "unknown_name"
 	}
 	client := clientJson {
 		config:  &conf,

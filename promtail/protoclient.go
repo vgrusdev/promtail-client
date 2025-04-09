@@ -26,8 +26,8 @@ type clientProto struct {
 
 func NewClientProto(conf ClientConfig) (Client, error) {
 	n := conf.Name
-	if n == nil {
-		conf.Name = ""
+	if n == "" {
+		conf.Name = "unknown_name"
 	}
 	client := clientProto{
 		config:  &conf,
@@ -51,7 +51,7 @@ func (c *clientProto) Chan() chan<- *PromtailStream {
 	return c.entries
 }
 
-func (c *clientJson) Single() chan<- *SingleEntry {
+func (c *clientProto) Single() chan<- *SingleEntry {
 	return c.single
 }
 
