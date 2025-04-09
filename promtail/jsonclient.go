@@ -61,7 +61,7 @@ func NewClientJson(conf ClientConfig) (Client, error) {
 		config:  &conf,
 		quit:    make(chan struct{}),
 		entries: make(chan *PromtailStream, LOG_ENTRIES_CHAN_SIZE),
-		single   make(chan *SingleEntry, LOG_ENTRIES_CHAN_SIZE),
+		single:   make(chan *SingleEntry, LOG_ENTRIES_CHAN_SIZE),
 		client:  myHttpClient{
 					parent: http.Client {
 						Timeout: conf.Timeout,
@@ -136,7 +136,7 @@ type SingleEntry struct {
 			}
 			s := PromtailStream {
 				Labels: sentry.Labels,
-				Entries: []*PromtailEntry { &e, }
+				Entries: []*PromtailEntry { &e, },
 			}
 			batch = append(batch, &s)
 			batchSize++
