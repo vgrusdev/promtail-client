@@ -113,7 +113,7 @@ func (c *clientJson) run() {
 				batchSize = 0
 				maxWait.Reset(c.config.BatchWait)
 			}
-		case sentry := <-c.single
+		case sentry := <-c.single:
 /*
 		// Promtail common Logs entry format accepted by Chan() chan<- *PromtailStream
 type PromtailEntry struct {

@@ -33,7 +33,7 @@ func NewClientProto(conf ClientConfig) (Client, error) {
 		config:  &conf,
 		quit:    make(chan struct{}),
 		entries: make(chan *PromtailStream, LOG_ENTRIES_CHAN_SIZE),
-		single   make(chan *SingleEntry, LOG_ENTRIES_CHAN_SIZE),
+		single:  make(chan *SingleEntry, LOG_ENTRIES_CHAN_SIZE),
 		client:  myHttpClient{
 			parent: http.Client {
 				Timeout: conf.Timeout,
@@ -86,14 +86,14 @@ func (c *clientProto) run() {
 				batchSize = 0
 				maxWait.Reset(c.config.BatchWait)
 			}
-		case sentry := <-c.single
+		case sentry := <-c.single:
 			e := PromtailEntry {
 				Ts:     sentry.Ts,
 				Line:   sentry.Line,
 			}
 			s := PromtailStream {
 				Labels:  sentry.Labels,
-				Entries: []*PromtailEntry { &e, }
+				Entries: []*PromtailEntry { &e, },
 			}
 			batch = append(batch, &s)
 			batchSize++
