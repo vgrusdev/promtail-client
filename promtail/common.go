@@ -22,6 +22,7 @@ type Client interface {
 	Chan() chan<- *PromtailStream
 	Single() chan<- *SingleEntry
 	Shutdown()
+	GetLocation() *time.Location
 }
 
 // Promtail common Logs entry format accepted by Chan() chan<- *PromtailStream

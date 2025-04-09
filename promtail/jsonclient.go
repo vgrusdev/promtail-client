@@ -88,6 +88,10 @@ func (c *clientJson) Shutdown() {
 	c.waitGroup.Wait()
 }
 
+func (c *clientJson) GetLocation() *time.Location {
+	return c.config.Location
+}
+
 func (c *clientJson) run() {
 	var batch []*PromtailStream
 	batchSize := 0

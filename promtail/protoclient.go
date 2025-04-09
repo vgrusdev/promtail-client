@@ -60,6 +60,10 @@ func (c *clientProto) Shutdown() {
 	c.waitGroup.Wait()
 }
 
+func (c *clientProto) GetLocation() *time.Location {
+	return c.config.Location
+}
+
 func (c *clientProto) run() {
 	var batch []*PromtailStream
 	batchSize := 0
