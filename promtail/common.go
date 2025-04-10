@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+	"regexp"
 )
 const LOG_ENTRIES_CHAN_SIZE = 5000
 
@@ -65,4 +66,17 @@ func (client *myHttpClient) sendReq(method, url string, ctype string, reqBody []
 		return nil, nil, err
 	}
 	return resp, resBody, nil
+}
+
+// returns an error in case the url value cannot be parsed as URL
+func validateUrl(url string) (string, error) {
+	hasScheme, _ := regexp.MatchString("^https?://", url)
+	if !hasScheme {
+		url = "http://" + url
+	}
+	_, err := url.ParseRequestURI(url)
+	if err != nil {
+		return url, errors.Wrap(err, "could not parse uri: " + url)
+	}
+	return url, nil
 }

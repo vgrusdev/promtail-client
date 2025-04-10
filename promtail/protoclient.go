@@ -1,7 +1,7 @@
 package promtail
 
 import (
-	//"fmt"
+	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	
@@ -29,6 +29,12 @@ func NewClientProto(conf *ClientConfig) (Client, error) {
 	if n == "" {
 		conf.Name = "unknown_name"
 	}
+	url, err := validateUrl(conf.PushURL)
+	if err != nil {
+		fmt.Printf("promtail.ClientProto: incorrect PushURL: %s\n", conf.PushURL)
+		return nil, err
+	}
+	conf.PushURL = url
 	client := clientProto{
 		config:  conf,
 		quit:    make(chan struct{}),
@@ -158,6 +164,7 @@ func (c *clientProto) send(batch []*PromtailStream) {
 			entries = append(entries, &protoEntry)
 		}
 
+		pStream.Labels["name"] = c.config.Name
 		labels := mapToLabels(pStream.Labels)
 		protoStream := logproto.Stream {
 			//Labels: pStream.Labels,

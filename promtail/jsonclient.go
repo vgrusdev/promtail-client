@@ -57,6 +57,12 @@ func NewClientJson(conf *ClientConfig) (Client, error) {
 	if n == "" {
 		conf.Name = "unknown_name"
 	}
+	url, err := validateUrl(conf.PushURL)
+	if err != nil {
+		fmt.Printf("promtail.ClientJson: incorrect PushURL: %s\n", conf.PushURL)
+		return nil, err
+	}
+	conf.PushURL = url
 	client := clientJson {
 		config:  conf,
 		quit:    make(chan struct{}),
@@ -172,6 +178,7 @@ func (c *clientJson) send(batch []*PromtailStream) {
 			jEntry := jsonEntry { fmt.Sprint(pEntry.Ts.UnixNano()), pEntry.Line, }
 			entries = append(entries, &jEntry)
 		}
+		pStream.Labels["name"] = c.config.Name
 		jStream := jsonStream {
 			Labels: pStream.Labels,
 			Entries: entries,
