@@ -188,7 +188,7 @@ func (c *clientJson) send(batch []*PromtailStream) {
 		fmt.Printf("promtail.ClientJson: unable to marshal a JSON document: %s\n", err)
 		return
 	}
-	//fmt.Println(string(jsonMsg))
+	fmt.Println(string(jsonMsg))
 
 	resp, body, err := c.client.sendReq("POST", c.config.PushURL, "application/json", jsonMsg)
 	if err != nil {
