@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 	"regexp"
+	"github.com/pkg/errors"
 )
 const LOG_ENTRIES_CHAN_SIZE = 5000
 
