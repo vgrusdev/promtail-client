@@ -71,14 +71,14 @@ func (client *myHttpClient) sendReq(method, url string, ctype string, reqBody []
 }
 
 // returns an error in case the url value cannot be parsed as URL
-func validateUrl(url string) (string, error) {
-	hasScheme, _ := regexp.MatchString("^https?://", url)
+func validateUrl(u string) (string, error) {
+	hasScheme, _ := regexp.MatchString("^https?://", u)
 	if !hasScheme {
-		url = "http://" + url
+		u = "http://" + u
 	}
-	_, err := url.ParseRequestURI(url)
+	_, err := url.ParseRequestURI(u)
 	if err != nil {
-		return url, errors.Wrap(err, "could not parse uri: " + url)
+		return u, errors.Wrap(err, "could not parse uri: " + u)
 	}
-	return url, nil
+	return u, nil
 }
