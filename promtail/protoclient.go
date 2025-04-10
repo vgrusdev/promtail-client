@@ -192,6 +192,11 @@ func (c *clientProto) send(batch []*PromtailStream) {
 	}
 	
 	if resp.StatusCode != 204 {
+		if resp.StatusCode == 400 {
+			// Message too old
+			// Debug log.Printf("promtail.ClientJson: %s'n", resp.StatusCode, body)
+			return
+		}
 		log.Printf("promtail.ClientProto: Unexpected HTTP status code: %d, message: %s\n", resp.StatusCode, body)
 		return
 	}

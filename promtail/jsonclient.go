@@ -195,7 +195,7 @@ func (c *clientJson) send(batch []*PromtailStream) {
 		fmt.Printf("promtail.ClientJson: unable to marshal a JSON document: %s\n", err)
 		return
 	}
-	fmt.Println(string(jsonMsg))
+	// Debug  fmt.Println(string(jsonMsg))
 
 	resp, body, err := c.client.sendReq("POST", c.config.PushURL, "application/json", jsonMsg)
 	if err != nil {
@@ -204,6 +204,11 @@ func (c *clientJson) send(batch []*PromtailStream) {
 	}
 
 	if resp.StatusCode != 204 {
+		if resp.StatusCode == 400 {
+			// Message too old
+			// Debug log.Printf("promtail.ClientJson: %s'n", resp.StatusCode, body)
+			return
+		}
 		log.Printf("promtail.ClientJson: Unexpected HTTP status code: %d, message: %s\n", resp.StatusCode, body)
 		return
 	}
