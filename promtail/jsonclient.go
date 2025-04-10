@@ -178,7 +178,7 @@ func (c *clientJson) send(batch []*PromtailStream) {
 			jEntry := jsonEntry { fmt.Sprint(pEntry.Ts.UnixNano()), pEntry.Line, }
 			entries = append(entries, &jEntry)
 		}
-		pStream.Labels["name"] = c.config.Name
+		pStream.Labels["service_name"] = c.config.Name
 		jStream := jsonStream {
 			Labels: pStream.Labels,
 			Entries: entries,

@@ -164,7 +164,7 @@ func (c *clientProto) send(batch []*PromtailStream) {
 			entries = append(entries, &protoEntry)
 		}
 
-		pStream.Labels["name"] = c.config.Name
+		pStream.Labels["service_name"] = c.config.Name
 		labels := mapToLabels(pStream.Labels)
 		protoStream := logproto.Stream {
 			//Labels: pStream.Labels,
