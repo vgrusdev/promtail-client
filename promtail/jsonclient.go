@@ -63,6 +63,10 @@ func NewClientJson(conf *ClientConfig) (Client, error) {
 		return nil, err
 	}
 	conf.PushURL = url
+
+	if conf.TenantID == "" {
+		conf.TenantID = "fake"
+	}
 	client := clientJson {
 		config:  conf,
 		quit:    make(chan struct{}),
@@ -197,7 +201,7 @@ func (c *clientJson) send(batch []*PromtailStream) {
 	}
 	// Debug  fmt.Println(string(jsonMsg))
 
-	resp, body, err := c.client.sendReq("POST", c.config.PushURL, "application/json", jsonMsg)
+	resp, body, err := c.client.sendReq("POST", c.config.PushURL, "application/json", c.config.TenantID, jsonMsg)
 	if err != nil {
 		log.Printf("promtail.ClientJson: unable to send an HTTP request: %s\n", err)
 		return

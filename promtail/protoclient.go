@@ -35,6 +35,10 @@ func NewClientProto(conf *ClientConfig) (Client, error) {
 		return nil, err
 	}
 	conf.PushURL = url
+
+	if conf.TenantID == "" {
+		conf.TenantID = "fake"
+	}
 	client := clientProto{
 		config:  conf,
 		quit:    make(chan struct{}),
@@ -185,7 +189,7 @@ func (c *clientProto) send(batch []*PromtailStream) {
 
 	buf = snappy.Encode(nil, buf)
 
-	resp, body, err := c.client.sendReq("POST", c.config.PushURL, "application/x-protobuf", buf)
+	resp, body, err := c.client.sendReq("POST", c.config.PushURL, "application/x-protobuf", c.config.TenantID, buf)
 	if err != nil {
 		log.Printf("promtail.ClientProto: unable to send an HTTP request: %s\n", err)
 		return

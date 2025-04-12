@@ -12,8 +12,9 @@ import (
 const LOG_ENTRIES_CHAN_SIZE = 5000
 
 type ClientConfig struct {
-	Name               string           // Label name will be added to the stream, will be discovered as service_name in Loki
+	Name               string           // Label service_name will be added to the stream
 	PushURL            string			// E.g. http://localhost:3100/api/prom/push
+	TenantID           string			// will be sent to LOKI as X-Scope-OrgID header, will be sat as fake in case of empty
 	BatchWait          time.Duration	// Batch flush wait timeout
 	BatchEntriesNumber int				// Batch buffer size
 	Timeout            time.Duration    // HTTP Client Timeout !ToDo
@@ -49,13 +50,14 @@ type myHttpClient struct {
 }
 
 // A bit more convenient method for sending requests to the HTTP server
-func (client *myHttpClient) sendReq(method, url string, ctype string, reqBody []byte) (resp *http.Response, resBody []byte, err error) {
+func (client *myHttpClient) sendReq(method, url, ctype, tenant string, reqBody []byte) (resp *http.Response, resBody []byte, err error) {
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return nil, nil, err
 	}
 
 	req.Header.Set("Content-Type", ctype)
+	req.Header.Add("X-Scope-OrgID", tenant)
 
 	resp, err = client.parent.Do(req)
 	if err != nil {
